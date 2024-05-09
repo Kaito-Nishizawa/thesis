@@ -1,0 +1,169 @@
+
+\documentclass[submit]{ipsj}
+%\documentclass{ipsj}
+
+\usepackage{graphicx}
+\usepackage{latexsym}
+
+\def\Underline{\setbox0\hbox\bgroup\let\\\endUnderline}
+\def\endUnderline{\vphantom{y}\egroup\smash{\underline{\box0}}\\}
+\def\|{\verb|}
+
+\setcounter{巻数}{59}
+\setcounter{号数}{1}
+\setcounter{page}{1}
+
+
+%\受付{2016}{3}{4}
+%\再受付{2015}{7}{16}   %省略可能
+%\再再受付{2015}{7}{20} %省略可能
+%\再再受付{2015}{11}{20} %省略可能
+%\採録{2016}{8}{1}
+
+
+
+
+\begin{document}
+
+
+\title{歌声合成システムNNSVSを用いた斉唱の自然性に関する要因調査}
+
+\etitle{Investigation of factors related to the naturalness of unison using the singing voice synthesis system NNSVS}
+
+%*\affiliate{IPSJ}{情報処理学会\\
+%IPSJ, Chiyoda, Tokyo 101--0062, Japan}
+
+
+%\paffiliate{JU}{情報処理大学\\
+%Johoshori University}
+\affiliate{NUI}{名古屋大学 情報学研究科}
+\affiliate{NUITC}{名古屋大学 情報基盤センター}
+
+\author{西澤 佳飛}{Kaito Nishizawa}{NUI}[joho.taro@ipsj.or.jp]
+\author{山本 龍一}{Ryuichi Yamamoto}{NUI}
+\author{戸田 智基}{Tomoki Toda}{NUITC}[gakkai.jiro@ipsj.or.jp]
+
+\begin{abstract}
+斉唱とは複数人が同一の旋律を歌う歌唱方式であり、複数の歌声が調和しあうことで独唱には無い深みのある歌声が生成される。
+歌声情報処理が発展する中、斉唱に対する情報処理の実現も大いに期待されるが、その第一歩として、斉唱が持つ音響的特徴を明らかにすることが重要である。
+本研究では、音響的特徴として揺らぎに着目し、各種音響特徴量の揺らぎを制御した合成歌声を用いることで、斉唱の自然性に影響を与える要因を調査する。
+各種音響特徴量を個別に操作可能な歌声合成手法としてNNSVS\cite{yamamoto2022nnsvs} を活用し、発声タイミング、基本周波数パターン、スペクトル包絡特徴量系列における揺らぎを操作した歌声合成を可能とすることで、所望の音響的特徴のみの揺らぎを持つ疑似斉唱の生成を実現する。
+生成した疑似斉唱に対する聴取実験の結果から、斉唱において重要な音響的特徴を明らかにする。
+\end{abstract}
+
+
+\begin{jkeyword}
+情報処理学会論文誌ジャーナル，\LaTeX，スタイルファイル，べからず集
+\end{jkeyword}
+
+\begin{eabstract}
+Unison is a singing method in which multiple singers sing the same melody, and the harmony of multiple voices produces a deep singing voice that is not found in solo singing.
+As the information processing of singing voice has been developed, it is highly expected to realize information processing for unison, but as a first step, it is important to clarify the acoustic characteristics of unison.
+In this study, we focus on fluctuation as an acoustic feature and investigate the factors that affect the naturalness of unison by using synthetic singing voices in which the fluctuation of various acoustic features is controlled.
+By utilizing NNSVS as a singing voice synthesis method that can manipulate various acoustic features individually, and by enabling singing voice synthesis that manipulates fluctuations in vocal timing, fundamental frequency patterns, and spectral envelope feature series, we can generate pseudo-singing voices with fluctuations in only desired acoustic features.
+The results of listening experiments on the generated pseudo-songs will be used to clarify the important acoustic features in unison.
+\end{eabstract}
+
+\begin{ekeyword}
+IPSJ Journal, \LaTeX, style files, ``Dos and Don'ts'' list
+\end{ekeyword}
+
+\maketitle
+
+%1
+\section{はじめに}
+
+斉唱とは複数人が同一の旋律を歌う歌唱方式であり、複数の歌声が調和しあうことで独唱には無い深みのある歌声が生成される。
+歌声情報処理が発展する中、合唱分離\cite{Matan2020, Peter2020, Chen2022}などの手法が現れている。
+斉唱に対する情報処理の実現も大いに期待されるが、その第一歩として、斉唱が持つ音響的特徴を明らかにすることが重要である。
+本研究では、音響的特徴として揺らぎに着目し、各種音響特徴量の揺らぎを制御した合成歌声を用いることで、斉唱の自然性に影響を与える要因を調査する。
+歌声合成手法としてNNSVSを活用し、発声タイミング、基本周波数パターン、スペクトル包絡特徴量系列における揺らぎを操作した歌声合成を可能とすることで、所望の音響的特徴のみの揺らぎを持つ疑似斉唱の生成を実現する。
+生成した疑似斉唱に対する聴取実験の結果から、斉唱において重要な音響的特徴を明らかにする。
+
+%2
+\section{関連研究}
+\label{sec:related}
+Goverらは、合唱分離についてWave-U-Netに基づく楽譜情報分離モデルを提案し、
+MuseScore General SoundFont で MIDIファイルから 347 曲の(合成)Bach Choraleを用いた実験が行われた。
+このモデルは、 SoundFontSynthesis データセットでは良好な性能を示したが、実際の合唱曲データセットで
+は不十分であった。\cite{Matan2020}
+
+また、Petermannらは基本周波数輪郭を条件とすることで分離性能を最適化する条件付き Spec-U-Net を提案さ
+れた。
+しかし、合唱音楽のデータセットがないため、評価は総時間 7 分の 3 曲のみで行われた。\cite{Peter2020}
+
+Chenらは合唱曲の音源分離タスクに合成されたトレーニングデータを使用するために合唱音楽データを合成する自動パイプ
+ラインを提供した。
+実験で合成された合唱データで分離を行った際、周波数領域モデルの Spec-U-Net が最も良い分離性能を示した。
+そして、実際の合唱音楽データセットで分離を行った際、合成データがモデルの性能を向上させるのに十分な品質であることを実証した。\cite{Chen2022}
+
+%3
+\section{NNSVS}
+\label{sec:nnsvs}
+NNSVSとは山本龍一氏によって制作されたオープンソースの歌声生成ツールである．\cite{yamamoto2022nnsvs}
+
+
+\section{提案手法}
+\label{methods}
+
+
+%4
+\section{実験}
+\label{sec:experiment}
+\subsection{揺らぎの組み合わせによる疑似斉唱の自然性}
+
+\subsection{疑似斉唱の歌唱人数による影響}
+%5
+\section{まとめ}
+
+\begin{acknowledgment}
+
+\end{acknowledgment}
+
+\begin{thebibliography}{9}
+\bibitem{yamamoto2022nnsvs}
+R. Yamamoto, R. Yoneyama, and T. Toda.
+"NNSVS: A Neural Network-Based Singing Voice Synthesis Toolkit"
+in {\it ICASSP 2023-2023 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP).}
+IEEE, 2023, pp. 1-5
+
+\bibitem{Matan2020}
+M. Gover and P. Depalle. "Score-informed source separation of choral music"
+in {\it Proceedings of the 21th International Society for Music Information Retrieval
+Conference, ISMIR 2020.}
+
+\bibitem{Peter2020}
+D. Petermann, P. Chandna, H. Cuesta, J. Bonada, and E. Gómez.
+“Deep learning based source separation applied to choir ensembles,” in
+{\it Proceedings of the 21th International Society for Music Information RetrievalConference, ISMIR 2020.}
+
+\bibitem{Chen2022}
+K. Chen.
+"Improving Choral Music Separation through Expressive Synthesized Data from Sampled Instruments" (2022)
+in {\it Proceedings of the 23th
+International Society for Music Information Retrieval
+Conference, ISMIR 2022.}
+
+\end{thebibliography}
+
+\begin{biography}
+\profile{m,E}{情報 太郎}{1970年生．1992年情報処理大学理学部情報科学科卒業．
+1994年同大学大学院修士課程修了．同年情報処理学会入社．オンライン出版の研究
+に従事．電子情報通信学会，IEEE，ACM 各会員．}
+%
+\profile{n}{処理 花子}{1960年生．1982年情報処理大学理学部情報科学科卒業．
+1984年同大学大学院修士課程修了．1987年同博士課程修了．理学博士．1987年情報処
+理大学助手．1992年架空大学助教授．1997年同大教授．オンライン出版の研究
+に従事．2010年情報処理記念賞受賞．電子情報通信学会，IEEE，IEEE-CS，ACM
+各会員．}
+%
+\profile{h,L}{学会 次郎}{1950年生．1974年架空大学大学院修士課程修了．
+1987年同博士課程修了．工学博士．1977年架空大学助手．1992年情報処理大学助
+教授．1987年同大教授．2000年から情報処理学会顧問．オンライン出版の研究
+に従事．2010年情報処理記念賞受賞．情報処理学会理事．電子情報通信学会，
+IEEE，IEEE-CS，ACM 各会員．}
+\end{biography}
+
+
+
+\end{document}
